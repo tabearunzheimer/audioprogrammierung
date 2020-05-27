@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Online-Soundboard</title>
+        <meta charset="utf-8">
+        <link href="./style.css" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <h1>Online-Soundboard</h1>
+        </header>
+        <main>
+            
+            <h2>Drücke auf Start und drücke dann eine Taste um einen Ton abzuspielen: </h2>
+               
+               
+                <!--
+            <button onclick="resume()"> Weiter </button>
+            <button onclick="playFile()"> Sounddatei </button>-->
+            <div id="settings">
+                <div id="waveSettings1" class="oscs waveSettings active">
+                    <button onclick="start()"> Start </button>    
+                    <button onclick="stop()"> Stop </button>
+                    <br>
+                    <br>
+                    <div>
+                        <label for="startTime">Delay beim klicken:</label>
+                        <input id="startTimeRange" type="range" id="startTime" name="startTime" min="0" max="10" value="0" step="0.5" onchange="startTimeChange()">
+                        <h4 id="startTimeValue">0</h4>
+                        <br>
+                        <label for="endTime">Delay beim loslassen:</label>
+                        <input id="endTimeRange" type="range" id="endTime" name="endTime" min="0" max="5" value="0" step="0.01" onchange="endTimeChange()">
+                        <h4 id="endTimeValue">0</h4>
+                        <br>
+                        <label for="vol">Lautstärke:</label>
+                        <input id="volume" type="range" id="volume" name="volume" min="0.01" max="1" value="1" step="0.01" onchange="volumeChange()">
+                        <h4 id="volumeValue">1</h4>
+                    </div>
+                    <div>
+                        <h2>Wellentyp</h2>
+                        <form name="settings1">
+                            <input type="radio" name="waveType" id="sin" checked="true" value="sine" >Sinus<br>
+                            <input type="radio" name="waveType" id="sqaure" value="square">Rechteck<br>
+                            <input type="radio" name="waveType" id="triangle" value="triangle">Dreieck<br>
+                            <input type="radio" name="waveType" id="sawtooth" value="sawtooth">Sägezahn
+                        </form>
+                    </div>
+                </div>
+
+
+                <div id="externSound">
+                    <h3>Externe Sounddatei</h3>
+                    <button id="playExtern" disabled> Externe Sounddatei abspielen</button>
+                    <button id="stopExtern" disabled> Externe Sounddatei beenden</button>
+                    <br><br>
+                    <label for="volExtern">Lautstärke:</label>
+                        <input id="volumeExtern" type="range" id="volumeExtern" name="volumeExtern" min="0.0001" max="1" value="1" step="0.0001">
+                        <h4 id="volumeValueExtern">1</h4>
+                </div>
+            </div>
+            <div>
+                Benutze die folgenden Tasten um Töne zu spielen:
+               <table>
+                    <tr>
+                        <th>Note</th>
+                        <th>Taste</th>
+                    </tr>
+                    <tr>
+                        <td>C</td>
+                        <td>A</td>
+                    </tr>
+                    <tr>
+                        <td>C#</td>
+                        <td>W</td>
+                    </tr>
+                    <tr>
+                        <td>D</td>
+                        <td>S</td>
+                    </tr>
+                    <tr>
+                        <td>D#</td>
+                        <td>E</td>
+                    </tr>
+                    <tr>
+                        <td>E</td>
+                        <td>D</td>
+                    </tr>
+                    <tr>
+                        <td>F</td>
+                        <td>F</td>
+                    </tr>
+                    <tr>
+                        <td>G</td>
+                        <td>J</td>
+                    </tr>
+                    <tr>
+                        <td>G#</td>
+                        <td>U</td>
+                    </tr>
+                    <tr>
+                        <td>A</td>
+                        <td>K</td>
+                    </tr>
+                    <tr>
+                        <td>B</td>
+                        <td>I</td>
+                    </tr>
+                    <tr>
+                        <td>H</td>
+                        <td>L</td>
+                    </tr>
+                    <tr>
+                        <td>C</td>
+                        <td>O</td>
+                    </tr>
+                    <tr>
+                        <td>Eine Oktave tiefer</td>
+                        <td>Strg/Ctrl</td>
+                    </tr>
+                    <tr>
+                        <td>Eine Oktave höher</td>
+                        <td>Leertaste</td>
+                    </tr>
+               </table>
+            </div>
+        </main>
+        <footer>
+            <div>&#169; Copyright Tabea Runzheimer</div>
+        </footer>
+
+        <script> 
+            var items = [
+                ['A', 261.4], //C
+                ['W', 277.2], //Cis
+                ['S', 293.7], //D
+                ['E', 311.1], //Dis
+                ['D', 329.6],
+                ['F', 349.2],
+                ['T', 370.0],
+                ['J', 392.0],
+                ['U', 415.3],
+                ['K', 440.0],
+                ['I', 466.2],
+                ['L', 493.9],
+                ['O', 523.3]
+            ];
+                var context = new AudioContext();
+                var o = context.createOscillator();
+                var  g = context.createGain();
+                o.connect(g);
+                g.connect(context.destination);
+                
+                function start(){
+                    console.log("Start");   
+                    o.start();
+                }
+
+                function resume(){
+                    console.log("Start");   
+                    g.gain.exponentialRampToValueAtTime(volume, context.currentTime + 1);
+                }
+
+                function stop(){
+                    console.log("Stop");
+                    g.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 1);
+                }
+
+
+
+                var prevEvent = null;
+                //sets an event listener for keyboard input
+                document.addEventListener('keydown', function(event) {
+                    //console.log("down");
+                    //Leertaste = 32
+                    //Strg lks = 17
+                if (prevEvent != "keydown"){
+                    prevEvent = "keydown";
+                    if (event.keyCode == 32){
+                            for (j = 0; j < items.length; j++){
+                                items[j][1] *= 2;
+                            }
+                        } else if (event.keyCode == 17) {
+                            for (j = 0; j < items.length; j++){
+                                items[j][1] /= 2;
+                            }
+                        } else {
+                            playKey(event);
+                        }
+                }
+                    
+                });
+
+
+                function playKey(){
+                    for (i = 0; i < items.length; i++){
+                        if (event.keyCode == items[i][0].charCodeAt(0)){
+                            o.frequency.value = items[i][1];
+                            g.gain.exponentialRampToValueAtTime(volume, context.currentTime + startTimeValue);
+                            
+                        }
+                    }
+                }
+
+
+                document.addEventListener("keyup", function(event) {
+                    //console.log("up");
+                    prevEvent = "keyup";
+                    g.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + endTimeValue);
+                });
+
+                //sets an event listener  for the radiobuttons
+                var rad = document.settings1.waveType;
+                var prev = null;
+                for (var i = 0; i < rad.length; i++) {
+                    rad[i].addEventListener('change', function() {
+                        //(prev) ? console.log(prev.value): null;
+                        if (this !== prev) {
+                            prev = this;
+                        }
+                    // console.log(this.value)
+                        o.type = this.value;
+                    });
+                }
+
+                var startTimeValue = 0;
+                function startTimeChange(){
+                    var elementVal = document.getElementById("startTimeRange").value;
+                    //console.log("Value: " + elementVal);
+                    startTimeValue = parseFloat(elementVal);
+                    document.getElementById("startTimeValue").innerHTML = elementVal;
+                }
+
+                var endTimeValue = 0;
+                function endTimeChange(){
+                    var elementVal = document.getElementById("endTimeRange").value;
+                    //console.log("Value: " + elementVal);
+                    endTimeValue =  parseFloat(elementVal);
+                    document.getElementById("endTimeValue").innerHTML = elementVal;
+                }
+
+                var volume = 1;              
+                function volumeChange(){
+                    var elementVal = document.getElementById("volume").value;
+                    volume = parseFloat(elementVal);
+                    document.getElementById("volumeValue").innerHTML = elementVal;
+                }
+
+            
+            
+                 var oscIndex = 1;
+                function addNewOSC(){
+                    oscIndex++;
+                    var element = "waveSettings" + oscIndex;
+                    document.getElementById(element).classList.add("active");
+                    if (oscIndex >= 3 ){
+                        document.getElementById('addOSCBtn').disabled = true;
+                    }
+                }
+
+
+
+
+
+            //Externe Sounddatei beim Start laden 
+            (function () {
+                'use strict';
+
+                const URL = 'Test.mp3';
+                //const URL = 'RockDrumBacking95.mp3';
+                    
+                const context = new AudioContext();
+                var g = context.createGain();
+                const playButton = document.getElementById('playExtern');
+                    
+                let audioBuf;
+
+                window.fetch(URL)
+                    .then(response => response.arrayBuffer())
+                    .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
+                    .then(audioBuffer => {
+                        playButton.disabled = false;
+                        audioBuf = audioBuffer;
+                    });
+                    
+                    playButton.onclick = () => play(audioBuf);
+
+                function play(audioBuffer) {
+                    const source = context.createBufferSource();
+                    source.buffer = audioBuffer; 
+                    source.connect(g); 
+                    g.connect(context.destination);
+                    source.connect(context.destination);
+                    source.start();
+                    var stopBtn = document.getElementById('stopExtern');
+                    playButton.disabled = true;
+                    stopBtn.disabled = false;
+                    //beeden
+                    stopBtn.addEventListener('click', function(event){                      
+                        source.stop();
+                        stopBtn.disabled = true;
+                        playButton.disabled = false;
+                    });
+                    document.getElementById("volumeExtern").addEventListener('change', function (event) {
+                        var elementVal = document.getElementById("volumeExtern").value;
+                        //console.log("Value: " + elementVal);
+                        var volume = parseFloat(elementVal);
+                        document.getElementById("volumeValueExtern").innerHTML = elementVal;
+                        g.gain.exponentialRampToValueAtTime(volume, context.currentTime);
+                    });
+                }
+                }());
+
+
+        </script>
+    </body>
+</html>
